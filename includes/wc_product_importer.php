@@ -99,11 +99,6 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
             $command .= ' --catalog_visibility="' . esc_attr( $row['Visibility in catalog'] ) . '"';
             $command .= ' --tax_status="' . esc_attr( $row['Tax status'] ) . '"';
             $command .= ' --tax_class="' . esc_attr( $row['Tax class'] ) . '"';
-            // $command .= ' --weight="' . esc_attr( $row['Weight (lbs)'] ) . '"';
-            // $command .= ' --length="' . esc_attr( $row['Length (in)'] ) . '"';
-            // $command .= ' --width="' . esc_attr( $row['Width (in)'] ) . '"';
-            // $command .= ' --height="' . esc_attr( $row['Height (in)'] ) . '"'; 
-            $command .= ' --images="' . esc_attr( $row['Images'] ) . '"';
             $command .= ' --in_stock="' . ( isset( $row['In stock?'] ) && $row['In stock?'] == 1 ? 'true' : 'false' ) . '"';
             
             // Check and set categories
@@ -117,14 +112,14 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                     
                     if ( $category_term ) {
                         // Category exists, add its ID to category_ids
-                        $category_ids[] = $category_term->term_id;
+                        $category_ids[] = array('id' => $category_term->term_id);
                     } else {
                         // Category does not exist, create it
                         $result = WP_CLI::runcommand( 'term create product_cat "' . $category . '" --porcelain', array( 'return' => true ) );
                         
                         if ( $result && is_numeric( $result ) ) {
                             // Category created successfully, add its ID to category_ids
-                            $category_ids[] = $result;
+                            $category_ids[] = array('id' => $result);
                         } else {
                             // Failed to create category, log a warning
                             WP_CLI::warning( 'Failed to create category "' . $category . '"' );
@@ -134,7 +129,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                 
                 if ( ! empty( $category_ids ) ) {
                     // Add categories to the command string
-                    $command .= ' --categories="' . implode( ',', $category_ids ) . '"';
+                    $command .= ' --categories=\'' . json_encode($category_ids) . '\'';
                 }
             }
 
@@ -154,7 +149,6 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                     $command .= ' --tags="' . implode( ',', $tag_ids ) . '"';
                 }
             }
- 
 
             // Check and set shipping class
             if ( ! empty( $row['Shipping class'] ) ) {
@@ -166,12 +160,21 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                 }
             }
 
+            // Format images as objects
+            if ( ! empty( $row['Images'] ) ) {
+                $images = array_map('trim', explode(',', $row['Images']));
+                $image_objects = array_map(function($image) {
+                    return array('src' => esc_attr($image));
+                }, $images);
+                $command .= ' --images=\'' . json_encode($image_objects) . '\'';
+            }
+
             if ( ! empty( $attributes ) ) {
                 $command .= ' --attributes=\'' . json_encode( $attributes ) . '\'';
             }
 
             // Uncomment to log command for debugging
-            // WP_CLI::log( $command );
+            WP_CLI::log( $command );
 
             // Execute the command
             WP_CLI::runcommand( $command );
@@ -183,5 +186,4 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 
         WP_CLI::success( sprintf( 'Imported %d products.', $post_updated ) );
     }
-}
- 
+} 
