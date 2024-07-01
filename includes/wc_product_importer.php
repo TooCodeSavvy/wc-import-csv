@@ -151,7 +151,7 @@ public function product_import_from_csv( $args, $assoc_args ) {
            // Handmatig de HTML-entiteiten omzetten
             $categories_string = str_replace( '&gt;', '>', htmlspecialchars_decode( $row['Categories'] ) );
 
-            $command .= ' --categories="' . esc_attr( $categories_string ) . '"';
+            $command .= ' --categories="' . $row['Categories'] . '"';
 
         }
 
