@@ -86,7 +86,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				$command .= ' --catalog_visibility="' . esc_attr( $row[ $fields['Visibility in catalog'] ] ) . '"';
 				$command .= ' --type="' . esc_attr( $row[ $fields['Type'] ] ) . '"';
 				
-				$command = '--allow-root';
+				//$command = '--allow-root';
 
 				WP_CLI::runcommand( $command );
 
