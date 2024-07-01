@@ -126,15 +126,15 @@ public function product_import_from_csv( $args, $assoc_args ) {
                 
                 if ( $category_term ) {
                     // Category exists, add its ID to category_ids
-                    $category_ids[] = array('id' => $category_term->term_id);
-                } else { 
-                    WP_CLI::log('term create product_cat "' . $category . '" --porcelain', array( 'return' => true ));
+                    $category_ids[] = array( 'id' => $category_term->term_id );
+                } else {
                     // Category does not exist, create it
                     $result = WP_CLI::runcommand( 'term create product_cat "' . $category . '" --porcelain', array( 'return' => true ) );
                     
                     if ( $result && is_numeric( $result ) ) {
                         // Category created successfully, add its ID to category_ids
-                        $category_ids[] = array('id' => $result);
+                        $category_ids[] = array( 'id' => $result );
+                        WP_CLI::log( 'Created category "' . $category . '" with ID ' . $result );
                     } else {
                         // Failed to create category, log a warning
                         WP_CLI::warning( 'Failed to create category "' . $category . '"' );
@@ -144,9 +144,10 @@ public function product_import_from_csv( $args, $assoc_args ) {
             
             if ( ! empty( $category_ids ) ) {
                 // Add categories to the command string
-                $command .= ' --categories=\'' . json_encode($category_ids) . '\'';
+                $command .= ' --categories=\'' . json_encode( $category_ids ) . '\'';
             }
         }
+
 
         // Check and set tags
         if ( ! empty( $row['Tags'] ) ) {
