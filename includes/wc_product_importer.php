@@ -102,7 +102,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
             // $command .= ' --weight="' . esc_attr( $row['Weight (lbs)'] ) . '"';
             // $command .= ' --length="' . esc_attr( $row['Length (in)'] ) . '"';
             // $command .= ' --width="' . esc_attr( $row['Width (in)'] ) . '"';
-            $command .= ' --height="' . esc_attr( $row['Height (in)'] ) . '"'; 
+            // $command .= ' --height="' . esc_attr( $row['Height (in)'] ) . '"'; 
             $command .= ' --images="' . esc_attr( $row['Images'] ) . '"';
             $command .= ' --in_stock="' . ( isset( $row['In stock?'] ) && $row['In stock?'] == 1 ? 'true' : 'false' ) . '"';
             
