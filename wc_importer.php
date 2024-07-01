@@ -33,12 +33,19 @@ class WC_Importer{
 		//register all hooks.
 		$this->load_classes();
 	}
-
+ 
 	function load_classes() {
-
 		if ( class_exists( 'WP_CLI' ) ) {
+			error_log('WP_CLI class exists, attempting to include wc_product_importer.php');
 			include $this->plugin_dir . 'includes/wc_product_importer.php';
-			WP_CLI::add_command( 'wc-product', 'WC_Product_CLI_Importer' );
+			if (class_exists('WC_Product_CLI_Importer')) {
+				error_log('WC_Product_CLI_Importer class exists, adding command');
+				WP_CLI::add_command( 'wc-product', 'WC_Product_CLI_Importer' );
+			} else {
+				error_log('WC_Product_CLI_Importer class does not exist');
+			}
+		} else {
+			error_log('WP_CLI class does not exist');
 		}
 	}
 }
