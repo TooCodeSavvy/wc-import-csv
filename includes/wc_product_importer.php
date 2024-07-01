@@ -66,6 +66,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$fields = array_flip( $fields );
 					continue;
 				}
+				WP_CLI::log( __( "STARTED...", 'wc_importer' ) );
+
 				// Construct command
 				$command = 'wp wc product create';
 				$command .= ' --name="' . esc_attr( $row[ $fields['Name'] ] ) . '"';
@@ -83,6 +85,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				$command .= ' --tags="' . esc_attr( $row[ $fields['Tags'] ] ) . '"';
 				$command .= ' --catalog_visibility="' . esc_attr( $row[ $fields['Visibility in catalog'] ] ) . '"';
 				$command .= ' --type="' . esc_attr( $row[ $fields['Type'] ] ) . '"';
+				
+				$command = '--allow-root';
 
 				WP_CLI::runcommand( $command );
 
