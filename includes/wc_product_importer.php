@@ -144,7 +144,7 @@ public function product_import_from_csv( $args, $assoc_args ) {
             
             if ( ! empty( $category_ids ) ) {
                 // Add categories to the command string
-                $command .= ' --categories=\'' . json_encode( $category_ids ) . '\'';
+                $command .= ' --categories="' . esc_attr( $row['Categories'] ) . '"';
             }
         }
 
