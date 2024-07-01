@@ -115,7 +115,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 			}
 
 			// Uncomment to log command for debugging
-			// WP_CLI::log( $command );
+			 WP_CLI::log( $command );
 
 			// Execute the command
 			WP_CLI::runcommand( $command );
