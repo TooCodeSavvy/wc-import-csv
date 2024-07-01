@@ -63,18 +63,23 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 			$row = array_combine( $headers, $data );
 
 			$attributes = [];
-			if ( ! empty( $row['Attributes'] ) ) {
-				$attributes_data = explode(';', $row['Attributes']);
-				foreach ( $attributes_data as $attribute ) {
-					list($name, $position, $visible, $variation, $options) = explode('|', $attribute);
-					$attributes[] = array(
-						'name'      => $name,
-						'position'  => $position,
-						'visible'   => $visible,
-						'variation' => $variation,
-						'options'   => explode(',', $options),
-					);
-				}
+			if ( ! empty( $row['Attribute 1 name'] ) && ! empty( $row['Attribute 1 value(s)'] ) ) {
+				$attributes[] = array(
+					'name'      => $row['Attribute 1 name'],
+					'position'  => 0,
+					'visible'   => $row['Attribute 1 visible'],
+					'variation' => $row['Type'] == 'variable' ? '1' : '0',
+					'options'   => explode(',', $row['Attribute 1 value(s)']),
+				);
+			}
+			if ( ! empty( $row['Attribute 2 name'] ) && ! empty( $row['Attribute 2 value(s)'] ) ) {
+				$attributes[] = array(
+					'name'      => $row['Attribute 2 name'],
+					'position'  => 1,
+					'visible'   => $row['Attribute 2 visible'],
+					'variation' => $row['Type'] == 'variable' ? '1' : '0',
+					'options'   => explode(',', $row['Attribute 2 value(s)']),
+				);
 			}
 
 			foreach ( $row as $key => $value ) {
@@ -105,9 +110,9 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 				$command .= ' --date_on_sale_to="' . esc_attr( $row['Date sale price ends'] ) . '"';
 			}
 
-			if ( ! empty( $row['product_url'] ) && $row['Type'] == 'external' ) {
-				$command .= ' --product_url="' . esc_attr( $row['product_url'] ) . '"';
-				$command .= ' --button_text="' . esc_attr( $row['button_text'] ) . '"';
+			if ( ! empty( $row['External URL'] ) && $row['Type'] == 'external' ) {
+				$command .= ' --product_url="' . esc_attr( $row['External URL'] ) . '"';
+				$command .= ' --button_text="' . esc_attr( $row['Button text'] ) . '"';
 			}
 
 			if ( ! empty( $attributes ) ) {
@@ -115,7 +120,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 			}
 
 			// Uncomment to log command for debugging
-			 WP_CLI::log( $command );
+			WP_CLI::log( $command );
 
 			// Execute the command
 			WP_CLI::runcommand( $command );
