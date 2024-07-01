@@ -118,22 +118,24 @@ public function product_import_from_csv( $args, $assoc_args ) {
         // Check and set categories
         if ( ! empty( $row['Categories'] ) ) {
             $categories = array_map( 'trim', explode( '>', $row['Categories'] ) );
-            $category_ids = [];
-            
-            foreach ( $categories as $category ) {
+
+            foreach ( $categories as $index => $category ) {
+                // Trim whitespace and ensure no leading/trailing spaces
+                $category = trim( $category );
+
                 // Check if category exists
                 $category_term = get_term_by( 'name', $category, 'product_cat' );
-                
-                if ( $category_term ) {
-                    // Category exists, add its ID to category_ids
-                    $category_ids[] = array( 'id' => $category_term->term_id );
+
+                if ( $category_term && ! is_wp_error( $category_term ) ) {
+                    // Category exists, replace current category with its name
+                    $categories[ $index ] = $category_term->name;
                 } else {
                     // Category does not exist, create it
                     $result = WP_CLI::runcommand( 'term create product_cat "' . $category . '" --porcelain', array( 'return' => true ) );
-                    
+
                     if ( $result && is_numeric( $result ) ) {
-                        // Category created successfully, add its ID to category_ids
-                        $category_ids[] = array( 'id' => $result );
+                        // Category created successfully, replace current category with its name
+                        $categories[ $index ] = $category;
                         WP_CLI::log( 'Created category "' . $category . '" with ID ' . $result );
                     } else {
                         // Failed to create category, log a warning
@@ -141,12 +143,12 @@ public function product_import_from_csv( $args, $assoc_args ) {
                     }
                 }
             }
-            
-            if ( ! empty( $category_ids ) ) {
-                // Add categories to the command string
-                $command .= ' --categories="' . esc_attr( $row['Categories'] ) . '"';
-            }
+
+            // Implode categories back to string format
+            $categories_string = implode( ' > ', $categories );
+            $command .= ' --categories="' . esc_attr( $categories_string ) . '"';
         }
+
 
 
         // Check and set tags
