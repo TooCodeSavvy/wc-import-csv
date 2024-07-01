@@ -97,27 +97,73 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 			$command .= ' --status="' . ( isset( $row['Published'] ) && $row['Published'] == 1 ? 'publish' : 'draft' ) . '"';
 			$command .= ' --featured="' . ( isset( $row['Is featured?'] ) && $row['Is featured?'] == 1 ? 'true' : 'false' ) . '"';
 			$command .= ' --catalog_visibility="' . esc_attr( $row['Visibility in catalog'] ) . '"';
-			$command .= ' --stock_quantity="' . esc_attr( $row['Stock'] ) . '"';
-			$command .= ' --in_stock="' . ( isset( $row['In stock?'] ) && $row['In stock?'] == 1 ? 'true' : 'false' ) . '"';
-			$command .= ' --backorders="' . esc_attr( $row['Backorders allowed?'] ) . '"';
 			$command .= ' --tax_status="' . esc_attr( $row['Tax status'] ) . '"';
 			$command .= ' --tax_class="' . esc_attr( $row['Tax class'] ) . '"';
-			$command .= ' --categories="' . esc_attr( $row['Categories'] ) . '"';
-			$command .= ' --tags="' . esc_attr( $row['Tags'] ) . '"';
-			$command .= ' --images="' . esc_attr( $row['Images'] ) . '"';
-			$command .= ' --shipping_class="' . esc_attr( $row['Shipping class'] ) . '"';
-
-			if ( ! empty( $row['Date sale price starts'] ) ) {
-				$command .= ' --date_on_sale_from="' . esc_attr( $row['Date sale price starts'] ) . '"';
+			$command .= ' --weight="' . esc_attr( $row['Weight (lbs)'] ) . '"';
+			$command .= ' --length="' . esc_attr( $row['Length (in)'] ) . '"';
+			$command .= ' --width="' . esc_attr( $row['Width (in)'] ) . '"';
+			$command .= ' --height="' . esc_attr( $row['Height (in)'] ) . '"';
+			$command .= ' --in_stock="' . ( isset( $row['In stock?'] ) && $row['In stock?'] == 1 ? 'true' : 'false' ) . '"';
+			
+			// Check and set categories
+			if ( ! empty( $row['Categories'] ) ) {
+				$categories = array_map( 'trim', explode( '>', $row['Categories'] ) );
+				$category_ids = [];
+				foreach ( $categories as $category ) {
+					$category_term = get_term_by( 'name', $category, 'product_cat' );
+					if ( $category_term ) {
+						$category_ids[] = $category_term->term_id;
+					} else {
+						WP_CLI::warning( 'Category "' . $category . '" not found.' );
+					}
+				}
+				if ( ! empty( $category_ids ) ) {
+					$command .= ' --categories="' . implode( ',', $category_ids ) . '"';
+				}
 			}
 
-			if ( ! empty( $row['Date sale price ends'] ) ) {
-				$command .= ' --date_on_sale_to="' . esc_attr( $row['Date sale price ends'] ) . '"';
+			// Check and set tags
+			if ( ! empty( $row['Tags'] ) ) {
+				$tags = array_map( 'trim', explode( ',', $row['Tags'] ) );
+				$tag_ids = [];
+				foreach ( $tags as $tag ) {
+					$tag_term = get_term_by( 'name', $tag, 'product_tag' );
+					if ( $tag_term ) {
+						$tag_ids[] = $tag_term->term_id;
+					} else {
+						WP_CLI::warning( 'Tag "' . $tag . '" not found.' );
+					}
+				}
+				if ( ! empty( $tag_ids ) ) {
+					$command .= ' --tags="' . implode( ',', $tag_ids ) . '"';
+				}
 			}
 
-			if ( ! empty( $row['External URL'] ) && $row['Type'] == 'external' ) {
-				$command .= ' --product_url="' . esc_attr( $row['External URL'] ) . '"';
-				$command .= ' --button_text="' . esc_attr( $row['Button text'] ) . '"';
+			// Check and set images
+			if ( ! empty( $row['Images'] ) ) {
+				$image_urls = array_map( 'trim', explode( ',', $row['Images'] ) );
+				$image_ids = [];
+				foreach ( $image_urls as $image_url ) {
+					$image_id = wc_import_product_image( esc_url_raw( $image_url ), $row['Name'] );
+					if ( $image_id ) {
+						$image_ids[] = $image_id;
+					} else {
+						WP_CLI::warning( 'Failed to import image: ' . $image_url );
+					}
+				}
+				if ( ! empty( $image_ids ) ) {
+					$command .= ' --images="' . implode( ',', $image_ids ) . '"';
+				}
+			}
+
+			// Check and set shipping class
+			if ( ! empty( $row['Shipping class'] ) ) {
+				$shipping_class_term = get_term_by( 'name', $row['Shipping class'], 'product_shipping_class' );
+				if ( $shipping_class_term ) {
+					$command .= ' --shipping_class="' . $shipping_class_term->term_id . '"';
+				} else {
+					WP_CLI::warning( 'Shipping class "' . $row['Shipping class'] . '" not found.' );
+				}
 			}
 
 			if ( ! empty( $attributes ) ) {
