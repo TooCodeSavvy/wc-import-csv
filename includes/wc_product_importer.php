@@ -148,11 +148,10 @@ public function product_import_from_csv( $args, $assoc_args ) {
                 }
             }
 
-           // Implode categories back to string format
-            $categories_string = implode( ' > ', $categories );
-            // Convert any remaining HTML entities to characters
-            $categories_string = htmlspecialchars_decode( $categories_string );
+           // Handmatig de HTML entity omzetten naar het juiste teken
+            $categories_string = str_replace( '&gt;', '>', $categories_string );
             $command .= ' --categories="' . esc_attr( $categories_string ) . '"';
+
         }
 
 
