@@ -60,25 +60,23 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$fields = array_flip( $fields );
 					continue;
 				}
-
 				// Construct command
 				$command = 'wp wc product create';
-				$command .= ' --name="' . esc_attr( $row[ $fields['post_title'] ] ) . '"';
-				$command .= ' --slug="' . esc_attr( $row[ $fields['post_name'] ] ) . '"';
-				$command .= ' --sku="' . esc_attr( $row[ $fields['sku'] ] ) . '"';
-				$command .= ' --description="' . esc_attr( $row[ $fields['post_content'] ] ) . '"';
-				$command .= ' --short_description="' . esc_attr( $row[ $fields['post_excerpt'] ] ) . '"';
-				$command .= ' --status="' . esc_attr( $row[ $fields['post_status'] ] ) . '"';
-				$command .= ' --regular_price="' . esc_attr( $row[ $fields['regular_price'] ] ) . '"';
-				$command .= ' --sale_price="' . esc_attr( $row[ $fields['sale_price'] ] ) . '"';
-				$command .= ' --weight="' . esc_attr( $row[ $fields['weight'] ] ) . '"';
-				$command .= ' --length="' . esc_attr( $row[ $fields['length'] ] ) . '"';
-				$command .= ' --width="' . esc_attr( $row[ $fields['width'] ] ) . '"';
-				$command .= ' --height="' . esc_attr( $row[ $fields['height'] ] ) . '"';
-				$command .= ' --categories="' . esc_attr( $row[ $fields['tax:product_cat'] ] ) . '"';
-				$command .= ' --tags="' . esc_attr( $row[ $fields['tax:product_tag'] ] ) . '"';
-				$command .= ' --catalog_visibility="' . esc_attr( $row[ $fields['tax:product_visibility'] ] ) . '"';
-				$command .= ' --type="' . esc_attr( $row[ $fields['tax:product_type'] ] ) . '"';
+				$command .= ' --name="' . esc_attr( $row[ $fields['Name'] ] ) . '"';
+				$command .= ' --sku="' . esc_attr( $row[ $fields['SKU'] ] ) . '"';
+				$command .= ' --description="' . esc_attr( $row[ $fields['Description'] ] ) . '"';
+				$command .= ' --short_description="' . esc_attr( $row[ $fields['Short description'] ] ) . '"';
+				$command .= ' --status="' . ( isset( $fields['Published'] ) && $row[ $fields['Published'] ] == 1 ? 'publish' : 'draft' ) . '"';
+				$command .= ' --regular_price="' . esc_attr( $row[ $fields['Regular price'] ] ) . '"';
+				$command .= ' --sale_price="' . esc_attr( $row[ $fields['Sale price'] ] ) . '"';
+				$command .= ' --weight="' . esc_attr( $row[ $fields['Weight (lbs)'] ] ) . '"';
+				$command .= ' --length="' . esc_attr( $row[ $fields['Length (in)'] ] ) . '"';
+				$command .= ' --width="' . esc_attr( $row[ $fields['Width (in)'] ] ) . '"';
+				$command .= ' --height="' . esc_attr( $row[ $fields['Height (in)'] ] ) . '"';
+				$command .= ' --categories="' . esc_attr( $row[ $fields['Categories'] ] ) . '"';
+				$command .= ' --tags="' . esc_attr( $row[ $fields['Tags'] ] ) . '"';
+				$command .= ' --catalog_visibility="' . esc_attr( $row[ $fields['Visibility in catalog'] ] ) . '"';
+				$command .= ' --type="' . esc_attr( $row[ $fields['Type'] ] ) . '"';
 
 				WP_CLI::runcommand( $command );
 
