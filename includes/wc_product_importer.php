@@ -41,6 +41,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				WP_CLI::error( 'CSV file does not exist.' );
 			}
 
+			echo '<pre>';
+			var_dump( time() );
+			echo '</pre>';
+
+			WP_CLI::log( __( "Stated...", 'wc_importer' ) );
+
 			// Open CSV file
 			$handle = fopen( $csv_file, 'r' );
 
