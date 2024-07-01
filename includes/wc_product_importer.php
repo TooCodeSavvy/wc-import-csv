@@ -32,36 +32,43 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
         if ( empty( $assoc_args['csv'] ) ) {
             WP_CLI::error( 'Please provide the --csv argument.' );
         }
-
+    
         $csv_file = $assoc_args['csv'];
-
+    
         if ( ! file_exists( $csv_file ) ) {
             WP_CLI::error( 'CSV file does not exist.' );
         }
-
+    
         WP_CLI::log( __( "Started...", 'wc_importer' ) );
-
+    
         // Open CSV file
         $handle = fopen( $csv_file, 'r' );
-
+    
         if ( false === $handle ) {
             WP_CLI::error( 'Unable to open CSV file.' );
         }
-
+    
         $count = 0;
         $post_updated = 0;
         $headers = [];
-
+        $parent_ids = []; // Associative array to store SKU => parent_id mappings
+    
         while ( ( $data = fgetcsv( $handle, 0, ',' ) ) !== FALSE ) {
             $count++;
-
+    
             if ( $count == 1 ) {
                 $headers = $data;
                 continue;
             }
-
+    
             $row = array_combine( $headers, $data );
-
+    
+            // Check if it's a variable product, store its SKU and parent_id
+            if ( $row['Type'] == 'variable' ) {
+                $parent_ids[ $row['SKU'] ] = $row['ID']; // Assuming 'ID' is the parent ID in your CSV
+            }
+    
+            // Prepare attributes
             $attributes = [];
             if ( ! empty( $row['Attribute 1 name'] ) && ! empty( $row['Attribute 1 value(s)'] ) ) {
                 $attributes[] = array(
@@ -81,13 +88,9 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                     'options'   => array_map('trim', explode(',', $row['Attribute 2 value(s)'])),
                 );
             }
-
-            foreach ( $row as $key => $value ) {
-                $row[$key] = htmlspecialchars( $value );
-            }
-
-            $command = 'wc product create';
-            $command .= ' --id="' . esc_attr( $row['ID'] ) . '"';
+    
+            // Prepare command to create product
+            $command = 'wp wc product create'; 
             $command .= ' --name="' . esc_attr( $row['Name'] ) . '"';
             $command .= ' --type="' . esc_attr( $row['Type'] ) . '"';
             $command .= ' --sku="' . esc_attr( $row['SKU'] ) . '"';
@@ -113,14 +116,14 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                     
                     if ( $category_term ) {
                         // Category exists, add its ID to category_ids
-                        $category_ids[] = array('id' => $category_term->term_id);
+                        $category_ids[] = $category_term->term_id;
                     } else {
                         // Category does not exist, create it
                         $result = WP_CLI::runcommand( 'term create product_cat "' . $category . '" --porcelain', array( 'return' => true ) );
                         
                         if ( $result && is_numeric( $result ) ) {
                             // Category created successfully, add its ID to category_ids
-                            $category_ids[] = array('id' => $result);
+                            $category_ids[] = $result;
                         } else {
                             // Failed to create category, log a warning
                             WP_CLI::warning( 'Failed to create category "' . $category . '"' );
@@ -130,10 +133,10 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                 
                 if ( ! empty( $category_ids ) ) {
                     // Add categories to the command string
-                    $command .= ' --categories=\'' . json_encode($category_ids) . '\'';
+                    $command .= ' --categories="' . implode( ',', $category_ids ) . '"';
                 }
             }
-
+    
             // Check and set tags
             if ( ! empty( $row['Tags'] ) ) {
                 $tags = array_map( 'trim', explode( ',', $row['Tags'] ) );
@@ -150,7 +153,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                     $command .= ' --tags="' . implode( ',', $tag_ids ) . '"';
                 }
             }
-
+    
             // Check and set shipping class
             if ( ! empty( $row['Shipping class'] ) ) {
                 $shipping_class_term = get_term_by( 'name', $row['Shipping class'], 'product_shipping_class' );
@@ -160,7 +163,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                     WP_CLI::warning( 'Shipping class "' . $row['Shipping class'] . '" not found.' );
                 }
             }
-
+    
             // Format images as objects
             if ( ! empty( $row['Images'] ) ) {
                 $images = array_map('trim', explode(',', $row['Images']));
@@ -169,22 +172,29 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
                 }, $images);
                 $command .= ' --images=\'' . json_encode($image_objects) . '\'';
             }
-
+    
+            // Add attributes if present
             if ( ! empty( $attributes ) ) {
                 $command .= ' --attributes=\'' . json_encode( $attributes ) . '\'';
             }
-
+    
+            // Check if it's a variation and set the parent_id based on SKU match
+            if ( $row['Type'] == 'variation' && ! empty( $parent_ids[ $row['SKU'] ] ) ) {
+                $command .= ' --parent_id="' . esc_attr( $parent_ids[ $row['SKU'] ] ) . '"';
+            }
+    
             // Uncomment to log command for debugging
-            WP_CLI::log( $command );
-
-            // Execute the command
+            // WP_CLI::log( $command );
+    
+            // Execute the command to create the product
             WP_CLI::runcommand( $command );
-
+    
             $post_updated++;
         }
-
+    
         fclose( $handle );
-
+    
         WP_CLI::success( sprintf( 'Imported %d products.', $post_updated ) );
     }
+    
 } 
