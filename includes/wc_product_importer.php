@@ -69,7 +69,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 					'position'  => 0,
 					'visible'   => $row['Attribute 1 visible'],
 					'variation' => $row['Type'] == 'variable' ? '1' : '0',
-					'options'   => explode(',', $row['Attribute 1 value(s)']),
+					'options'   => array_map('trim', explode(',', $row['Attribute 1 value(s)'])),
 				);
 			}
 			if ( ! empty( $row['Attribute 2 name'] ) && ! empty( $row['Attribute 2 value(s)'] ) ) {
@@ -78,7 +78,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 					'position'  => 1,
 					'visible'   => $row['Attribute 2 visible'],
 					'variation' => $row['Type'] == 'variable' ? '1' : '0',
-					'options'   => explode(',', $row['Attribute 2 value(s)']),
+					'options'   => array_map('trim', explode(',', $row['Attribute 2 value(s)'])),
 				);
 			}
 
@@ -86,11 +86,12 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 				$row[$key] = htmlspecialchars( $value );
 			}
 
-			$command = 'wp wc product create';
+			$command = 'wc product create';
 			$command .= ' --name="' . esc_attr( $row['Name'] ) . '"';
 			$command .= ' --type="' . esc_attr( $row['Type'] ) . '"';
 			$command .= ' --sku="' . esc_attr( $row['SKU'] ) . '"';
 			$command .= ' --regular_price="' . esc_attr( $row['Regular price'] ) . '"';
+			$command .= ' --sale_price="' . esc_attr( $row['Sale price'] ) . '"';
 			$command .= ' --description="' . esc_attr( $row['Description'] ) . '"';
 			$command .= ' --short_description="' . esc_attr( $row['Short description'] ) . '"';
 			$command .= ' --status="' . ( isset( $row['Published'] ) && $row['Published'] == 1 ? 'publish' : 'draft' ) . '"';
@@ -101,6 +102,14 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 			$command .= ' --backorders="' . esc_attr( $row['Backorders allowed?'] ) . '"';
 			$command .= ' --tax_status="' . esc_attr( $row['Tax status'] ) . '"';
 			$command .= ' --tax_class="' . esc_attr( $row['Tax class'] ) . '"';
+			$command .= ' --weight="' . esc_attr( $row['Weight (lbs)'] ) . '"';
+			$command .= ' --length="' . esc_attr( $row['Length (in)'] ) . '"';
+			$command .= ' --width="' . esc_attr( $row['Width (in)'] ) . '"';
+			$command .= ' --height="' . esc_attr( $row['Height (in)'] ) . '"';
+			$command .= ' --categories="' . esc_attr( $row['Categories'] ) . '"';
+			$command .= ' --tags="' . esc_attr( $row['Tags'] ) . '"';
+			$command .= ' --images="' . esc_attr( $row['Images'] ) . '"';
+			$command .= ' --shipping_class="' . esc_attr( $row['Shipping class'] ) . '"';
 
 			if ( ! empty( $row['Date sale price starts'] ) ) {
 				$command .= ' --date_on_sale_from="' . esc_attr( $row['Date sale price starts'] ) . '"';
@@ -133,6 +142,4 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 		WP_CLI::success( sprintf( 'Imported %d products.', $post_updated ) );
 	}
 }
-
-// Register the WP-CLI command
-WP_CLI::add_command( 'wc-product', 'WC_Product_CLI_Importer' );
+ 
