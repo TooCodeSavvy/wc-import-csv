@@ -10,8 +10,7 @@ Author: dipesh.kakadiya
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-if ( defined( 'WP_CLI' ) && WP_CLI ) {
+ 
 
 	class WC_Product_CLI_Importer extends WP_CLI_Command {
 
@@ -99,5 +98,4 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		}
 	}
 
-	WP_CLI::add_command( 'wc-product', 'WC_Product_CLI_Importer' );
-}
+ 
