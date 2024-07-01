@@ -102,10 +102,6 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 			$command .= ' --backorders="' . esc_attr( $row['Backorders allowed?'] ) . '"';
 			$command .= ' --tax_status="' . esc_attr( $row['Tax status'] ) . '"';
 			$command .= ' --tax_class="' . esc_attr( $row['Tax class'] ) . '"';
-			$command .= ' --weight="' . esc_attr( $row['Weight (lbs)'] ) . '"';
-			$command .= ' --length="' . esc_attr( $row['Length (in)'] ) . '"';
-			$command .= ' --width="' . esc_attr( $row['Width (in)'] ) . '"';
-			$command .= ' --height="' . esc_attr( $row['Height (in)'] ) . '"';
 			$command .= ' --categories="' . esc_attr( $row['Categories'] ) . '"';
 			$command .= ' --tags="' . esc_attr( $row['Tags'] ) . '"';
 			$command .= ' --images="' . esc_attr( $row['Images'] ) . '"';
@@ -142,4 +138,6 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
 		WP_CLI::success( sprintf( 'Imported %d products.', $post_updated ) );
 	}
 }
- 
+
+// Register the WP-CLI command
+WP_CLI::add_command( 'wc-product', 'WC_Product_CLI_Importer' );
