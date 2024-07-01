@@ -91,9 +91,9 @@ public function product_import_from_csv( $args, $assoc_args ) {
             );
         }
 
-     /*   foreach ( $row as $key => $value ) {
+        foreach ( $row as $key => $value ) {
             $row[$key] = htmlspecialchars( $value );
-        }*/
+        }
 
         $command = 'wc product create'; 
         $command .= ' --name="' . esc_attr( $row['Name'] ) . '"';
