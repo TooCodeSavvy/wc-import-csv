@@ -148,8 +148,7 @@ public function product_import_from_csv( $args, $assoc_args ) {
                 }
             }
 
-            // Implode categories back to string format
-            $categories_string = implode( ' > ', $categories );
+            $categories_string = htmlspecialchars_decode( $row['Categories'] ); 
             $command .= ' --categories="' . esc_attr( $categories_string ) . '"';
         }
 
