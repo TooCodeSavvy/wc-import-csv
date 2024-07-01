@@ -91,9 +91,9 @@ public function product_import_from_csv( $args, $assoc_args ) {
             );
         }
 
-        foreach ( $row as $key => $value ) {
+     /*   foreach ( $row as $key => $value ) {
             $row[$key] = htmlspecialchars( $value );
-        }
+        }*/
 
         $command = 'wc product create'; 
         $command .= ' --name="' . esc_attr( $row['Name'] ) . '"';
@@ -127,7 +127,8 @@ public function product_import_from_csv( $args, $assoc_args ) {
                 if ( $category_term ) {
                     // Category exists, add its ID to category_ids
                     $category_ids[] = array('id' => $category_term->term_id);
-                } else {
+                } else { 
+                    WP_CLI::log('term create product_cat "' . $category . '" --porcelain', array( 'return' => true ));
                     // Category does not exist, create it
                     $result = WP_CLI::runcommand( 'term create product_cat "' . $category . '" --porcelain', array( 'return' => true ) );
                     
@@ -203,7 +204,7 @@ public function product_import_from_csv( $args, $assoc_args ) {
         $post_updated++;
     }
 
-    fclose( $handle );
+     
 
     WP_CLI::success( sprintf( 'Imported %d products.', $post_updated ) );
 }
