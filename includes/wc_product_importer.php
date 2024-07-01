@@ -117,7 +117,10 @@ public function product_import_from_csv( $args, $assoc_args ) {
 
         // Check and set categories
         if ( ! empty( $row['Categories'] ) ) {
-            $categories = array_map( 'trim', explode( '>', $row['Categories'] ) );
+            // Convert HTML entities back to their original characters
+            $categories_string = htmlspecialchars_decode( $row['Categories'] );
+
+            $categories = array_map( 'trim', explode( '>', $categories_string ) );
 
             foreach ( $categories as $index => $category ) {
                 // Trim whitespace and ensure no leading/trailing spaces
@@ -140,6 +143,7 @@ public function product_import_from_csv( $args, $assoc_args ) {
                     } else {
                         // Failed to create category, log a warning
                         WP_CLI::warning( 'Failed to create category "' . $category . '"' );
+                        WP_CLI::log( 'Error creating category: ' . WP_CLI::get_runner()->get_error_message() ); // Log the error message
                     }
                 }
             }
@@ -148,6 +152,7 @@ public function product_import_from_csv( $args, $assoc_args ) {
             $categories_string = implode( ' > ', $categories );
             $command .= ' --categories="' . esc_attr( $categories_string ) . '"';
         }
+
 
 
 
