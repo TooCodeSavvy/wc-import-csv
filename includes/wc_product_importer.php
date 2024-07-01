@@ -87,6 +87,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				//$command = '--allow-root';
 
+				WP_CLI::log( __( "command:...", $command ) );
+
 				WP_CLI::runcommand( $command );
 
 				$post_updated++;
