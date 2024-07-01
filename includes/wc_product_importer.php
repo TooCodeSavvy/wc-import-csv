@@ -87,7 +87,7 @@ class WC_Product_CLI_Importer extends WP_CLI_Command {
             }
 
             $command = 'wc product create';
-            $command .= ' --ID="' . esc_attr( $row['ID'] ) . '"';
+            $command .= ' --id="' . esc_attr( $row['ID'] ) . '"';
             $command .= ' --name="' . esc_attr( $row['Name'] ) . '"';
             $command .= ' --type="' . esc_attr( $row['Type'] ) . '"';
             $command .= ' --sku="' . esc_attr( $row['SKU'] ) . '"';
